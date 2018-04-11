@@ -1,12 +1,14 @@
-import settings
 from discord.ext import commands
 
+from config.config import Config
 from data.database import SqlTools
 
 startup_extensions = ['ext.members', 'ext.guilds', 'ext.data']
 
-bot = commands.Bot(settings.COMMAND_PREFIX)
+config = Config('config/config.ini')
+config.load_config()
 
+bot = commands.Bot(config.cmd_prefix)
 
 #
 # EVENTS
@@ -35,7 +37,7 @@ async def on_ready():
         print(bot.user.name)
         print(bot.user.id)
         sql = SqlTools()
-        output = sql.showVersion()
+        output = sql.show_version()
         if output != '':
             print('Succesfully connected to the Database:  ' + output)
         print('------')
@@ -46,7 +48,8 @@ async def on_ready():
             if is_new_server(servers[x - 1].id) == 0:
                 add_server(servers[x - 1].id, servers[x - 1].name)
     finally:
-        sql.close()
+        if sql:
+            sql.conn.close()
 
 
 #
@@ -66,22 +69,25 @@ async def hello(context):
 def is_new_server(pServerid):
     try:
         sql = SqlTools()
-        cur = sql.query('''Select serverid from settings where serverid = '{0}' '''.format(pServerid))
-        return cur.rowcount
+        if sql:
+            cur = sql.query('''Select serverid from settings where serverid = '{0}' '''.format(pServerid))
+            return cur.rowcount
     finally:
-        sql.close()
+        sql.conn.close()
 
 
 def add_server(pServerId, pServerName):
     try:
         sql = SqlTools()
-        cur = sql.query(
-            '''INSERT INTO settings (serverid, servername) values ('{0}', '{1}')'''.format(pServerId, pServerName))
-        # if cur.recordcount != 0:
-        print('Added a new Server to the Database: ' + pServerId + ' - ' + pServerName)
+        if sql:
+            cur = sql.query(
+                '''INSERT INTO settings (serverid, servername) values ('{0}', '{1}')'''.format(pServerId, pServerName))
+            # if cur.recordcount != 0:
+            print('Added a new Server to the Database: ' + pServerId + ' - ' + pServerName)
     finally:
-        sql.conn.commit()
-        sql.conn.close()
+        if sql:
+            sql.conn.commit()
+            sql.conn.close()
 
 
 if __name__ == "__main__":
@@ -92,4 +98,4 @@ if __name__ == "__main__":
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load extension {}\n{}'.format(extension, exc))
 
-bot.run(settings.TOKEN)
+bot.run(config.token)

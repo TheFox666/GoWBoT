@@ -4,34 +4,27 @@ from contextlib import closing
 
 import MySQLdb
 import requests
-import settings as set
+
+from config.config import Config
+
+config = Config('./config/config.ini')
+config.load_config()
 
 
 class SqlTools:
 
     def __init__(self):
-        self._host = set.HOST
-        self._user = set.USER
-        self._passwd = set.PASSWD
-        self._dbname = set.DATABASE
-        self.conn = MySQLdb.connect(set.HOST, set.USER, set.PASSWD, set.DATABASE)
+        self.conn = MySQLdb.connect(config.host, config.user, config.passwd, config.db)
 
     def connect(self):
-        self.conn = MySQLdb.connect(set.HOST, set.USER, set.PASSWD, set.DATABASE)
+        self.conn = MySQLdb.connect(config.host, config.user, config.passwd, config.db)
 
-    def close(self):
-        self.conn.close
-
-    def showVersion(self):
+    def show_version(self):
         if self.conn:
             cursor = self.conn.cursor()
             cursor.execute("SELECT VERSION()")
             data = cursor.fetchone()
-            return 'Databaseversion ' + str(data)
-
-    def exec(self, strSql):
-        if self.conn:
-            self.conn.cursor.execute(strSql)
+            return 'Database-Version ' + str(data)
 
     def query(self, sql):
         if self.conn:
@@ -73,7 +66,8 @@ class SqlTools:
                                GoldCurrWK,
                                SealsCurrWK,
                                TrohpiesCurrWK,
-                               EventCurrWK
+                               EventCurrWK,
+                               Guildname
                               ) VALUES 
                               (
                                '{0}',
@@ -88,9 +82,10 @@ class SqlTools:
                                 {9},
                                 {10},
                                 {11},
-                                '{12}'
+                                '{12}',
+                                '{13}'
 
                               ) """.format(row[0], row[1], row[2], row[3], row[4], row[5], row[6], row[7], row[8],
                                            row[9],
-                                           row[10], row[11], row[12]))
+                                           row[10], row[11], row[12], 'Magix'))
                 self.conn.commit()

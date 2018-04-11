@@ -1,71 +1,57 @@
-# settings.py
+# config.py
 
 # a place for all the constants defines etc...
 
 # Settings for Bot join
-import discord.server
-
-from data.database import SqlTools
+import configparser
 
 
-class Settings:
+class ConfigFormatError(Exception):
+    pass
+
+
+class Config:
+    # Bot-Settings
+    token = ''
+    invite_url = ''
+    cmd_prefix = ''
+
+    # Database-Settings
+    host = ''
+    user = ''
+    passwd = ''
+    db = ''
+
+    # Channel-Settings
     channel_results = ''
     channel_members = ''
-    server = ''
-    server_id = ''
-    server_name = ''
 
-    def __init(self):
-        self.server = discord.Server()
-        self.server_id = self.server.id
-        self.server_name = self.server.name
+    def __init__(self, config_file):
+        self.config_file = config_file
 
-    def get_channel_results(self):
-        try:
-            sql = SqlTools()
-            cur = sql.query("""Select ChannelResults, ChannelMembers 
-                         from settings where serverid = '{0}' """.format(self.server_id))
-            if cur.rowcount > 0:
-                row = cur.fetchone()
-                self.channel_results = row[0]
-                self.channel_members = row[1]
-        finally:
-            sql.conn.close()
+        self._config = configparser.ConfigParser()
+        self._config.read(config_file, encoding='utf-8')
 
-    def get_channel_members(self):
-        try:
-            sql = SqlTools()
-            cur = sql.query("""Select ChannelResults, ChannelMembers 
-                         from settings where serverid = '{0}' """.format(self.server_id))
-            if cur.rowcount > 0:
-                row = cur.fetchone()
-                self.channel_results = row[0]
-                self.channel_members = row[1]
-        finally:
-            sql.conn.close()
+        config_sections = {'BotSettings', 'Database', 'Channels'}.difference(self._config.sections())
+        if config_sections:
+            raise ConfigFormatError("""Your config has an invalid format! Please recheck it. 
+                                    The sections of the configfile need to be: 
+                                    [BotSettings]
+                                    .
+                                    [Database]
+                                    .
+                                    [Channels]
+                                    """)
 
-    def set_channel_results(self, channelname):
-        if self.channel_results == '':
-            raise ValueError("""The variable 'channel_results' is empty. Please  """)
+    def load_config(self):
+        self.token = self._config['BotSettings']['Token']
+        self.invite_url = self._config['BotSettings']['InviteUrl']
+        self.cmd_prefix = self._config['BotSettings']['CMDPrefix']
 
-        try:
-            sql = SqlTools()
-            sql.query(""" update settings set ChannelResults = {0},
-                                where serverid = {1}
-                            """.format(self.channel_results, self.server_id))
-            sql.conn.commit()
-        finally:
-            sql.conn.close()
+        self.host = self._config['Database']['Host']
+        self.user = self._config['Database']['User']
+        self.passwd = self._config['Database']['passwd']
+        self.db = self._config['Database']['DB']
 
-    def set_channel_members(self, channelname):
-        if self.channel_members == '':
-            raise ValueError("""The variable 'channel_members' is empty. Please  """)
-
-        try:
-            sql = SqlTools()
-            sql.query(""" update settings set ChannelMembers = {0}, 
-                                where serverid = {1}
-                            """.format(self.channel_members, self.server_id))
-            sql.conn.commit()
-        finally:
-            sql.conn.close()
+        self.channel_members = self._config['Channels']['Members']
+        self.channel_results = self._config['Channels']['Results']
