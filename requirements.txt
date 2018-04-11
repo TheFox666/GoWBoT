@@ -1,0 +1,12 @@
+MySQLdb
+requests
+aiohttp==1.0.5
+async-timeout==2.0.1
+chardet==3.0.4
+discord.py==0.16.12
+discord==0.0.2
+multidict==4.1.0
+mysqlclient==1.3.12
+pip==9.0.3
+setuptools==28.8.0
+websockets==3.4
