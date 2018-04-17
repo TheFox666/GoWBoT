@@ -37,6 +37,10 @@ class SqlTools:
                 cursor.execute(sql)
             return cursor
 
+    def get_gowdatadump(self):
+
+        gowdatadump = gowdatadump
+
     def fetch_data(self):
         url = "http://www.taransworld.com/guilds/Magix/main.pl?dl=1&col=abcdefghijklmnopqrstuvwxyz&dlToken=29iQIfd93oBVNWijH&showTime=1"
         # Api Links to csv for magix and enchanted. data is refreshed at 6 in the morning everyday

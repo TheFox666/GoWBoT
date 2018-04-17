@@ -10,6 +10,7 @@ config.load_config()
 
 bot = commands.Bot(config.cmd_prefix)
 
+
 #
 # EVENTS
 #
@@ -32,24 +33,25 @@ async def on_message(message):
 
 @bot.event
 async def on_ready():
-    try:
-        print('Logged in as')
-        print(bot.user.name)
-        print(bot.user.id)
-        sql = SqlTools()
-        output = sql.show_version()
-        if output != '':
-            print('Succesfully connected to the Database:  ' + output)
-        print('------')
-        servers = list(bot.servers)
-        print("Connected on " + str(len(bot.servers)) + " servers")
-        for x in range(len(servers)):
-            print('    ' + servers[x - 1].name)
-            if is_new_server(servers[x - 1].id) == 0:
-                add_server(servers[x - 1].id, servers[x - 1].name)
-    finally:
-        if sql:
-            sql.conn.close()
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    #     sql = SqlTools()
+    #    output = sql.show_version()
+    #   if output != '':
+    #      print('Succesfully connected to the Database:  ' + output)
+    print('------')
+    servers = list(bot.servers)
+    print("Connected on " + str(len(bot.servers)) + " servers")
+    for x in range(len(servers)):
+        print('    ' + servers[x - 1].name)
+        if is_new_server(servers[x - 1].id) == 0:
+            add_server(servers[x - 1].id, servers[x - 1].name)
+
+
+#  finally:
+#        if sql:
+#           sql.conn.close()
 
 
 #

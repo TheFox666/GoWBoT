@@ -1,6 +1,6 @@
 # member.py
 from data.database import SqlTools
-
+from data import tables
 
 class DataMembers:
 
